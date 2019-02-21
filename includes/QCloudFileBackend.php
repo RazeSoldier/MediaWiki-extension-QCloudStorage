@@ -139,7 +139,7 @@ class QCloudFileBackend extends \FileBackendStore {
 		try {
 			$this->client->get()->copyObject( [
 				'Bucket' => $this->bucket,
-				'CopySource' => $this->endpointBase . $this->getRemoteStoragePath( $params['src'] ),
+				'CopySource' => $this->endpointBase . '/' . $this->getRemoteStoragePath( $params['src'] ),
 				'Key' => $this->getRemoteStoragePath( $params['dst'] ),
 			] );
 		} catch ( NoSuchKeyException $e ) {
@@ -369,8 +369,8 @@ class QCloudFileBackend extends \FileBackendStore {
 		list( $container, $real ) = $this->resolveStoragePathReal( $storagePath );
 		$containerName = $this->getContainerName( $container );
 		// public container shouldn't need prefix
-		$prefix = $containerName === 'public' ? '' : $containerName;
-		return "$prefix/$real";
+		$prefix = $containerName === 'public' ? '' : "$containerName/";
+		return "$prefix$real";
 	}
 
 	/**

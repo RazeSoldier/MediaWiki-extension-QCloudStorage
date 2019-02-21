@@ -77,6 +77,7 @@ class QCloudAPIClient {
 	 * @throws \ErrorException
 	 */
 	public function upload( string $src, string $dst, string $host, array $meta = [] ) : bool {
+		$dst = '/' . $dst;
 		$headers = [];
 		foreach ( $meta as $key => $value ) {
 			$headers["x-cos-meta-$key"] = $value;
