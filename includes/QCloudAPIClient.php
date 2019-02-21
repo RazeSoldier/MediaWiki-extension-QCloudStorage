@@ -85,7 +85,7 @@ class QCloudAPIClient {
 		$headers['host'] = $host;
 		$headers['Authorization'] = $this->sign( 'put', $dst, $headers );
 		$magic = MediaWikiServices::getInstance()->getMimeAnalyzer();
-		$headers['Content-Type'] = $magic->guessMimeType( $src );
+		$headers['Content-Type'] = $magic->guessMimeType( $src, false );
 		$curl = new Curl();
 		$curl->setOpt( CURLOPT_PUT, true );
 		$curl->setHeaders( $headers );
