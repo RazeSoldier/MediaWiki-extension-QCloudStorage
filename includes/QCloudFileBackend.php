@@ -114,12 +114,15 @@ class QCloudFileBackend extends \FileBackendStore {
 		}
 		try {
 			$fileSha1 = sha1_file( $params['src'] );
-			$this->client->get()->putObject( [
-				'Bucket' => $this->bucket,
-				'Key' => $this->getRemoteStoragePath( $params['dst'] ),
-				'Body' => fopen( $params['src'], 'rb' ),
-				[ 'Metadata' => [ 'sha1' => \Wikimedia\base_convert( $fileSha1, 16, 36, 31 ) ] ]
-			] );
+			$meta = [
+				'sha1' => \Wikimedia\base_convert( $fileSha1, 16, 36, 31 ),
+				'size' => filesize( $params['src'] ),
+			];
+			$res = $this->client->upload( $params['src'], $this->getRemoteStoragePath( $params['dst'] ),
+				$this->endpointBase, $meta );
+			if ( !$res ) {
+				return StatusValue::newFatal( "Failed to upload {$params['src']}" );
+			}
 		} catch ( CosException $e ) {
 			return StatusValue::newFatal( $e->getMessage() );
 		}
@@ -192,8 +195,8 @@ class QCloudFileBackend extends \FileBackendStore {
 			'latest' => $res['LastModified'],
 			'mtime' => $res['LastModified'],
 		];
-		if ( isset( $res['Metadata']['sha1'] ) ) {
-			$return['sha1'] = $res['Metadata']['sha1'];
+		if ( isset( $res['Metadata'] ) ) {
+			$return = array_merge( $return, $res['Metadata'] );
 		}
 		return $return;
 	}

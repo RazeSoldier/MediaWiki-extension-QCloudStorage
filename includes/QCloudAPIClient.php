@@ -21,12 +21,17 @@
 namespace RazeSoldier\MWQCloudStorage;
 
 use Qcloud\Cos\Client;
+use Curl\Curl;
+use MediaWiki\MediaWikiServices;
 
 class QCloudAPIClient {
 	/**
 	 * @var Client
 	 */
 	private $client;
+
+	private $secretId;
+	private $secretKey;
 
 	/**
 	 * QCloudAPIClient constructor.
@@ -49,6 +54,8 @@ class QCloudAPIClient {
 				'secretKey' => $config['secretKey'],
 			],
 		] );
+		$this->secretId = $config['secretId'];
+		$this->secretKey = $config['secretKey'];
 	}
 
 	/**
@@ -57,5 +64,74 @@ class QCloudAPIClient {
 	 */
 	public function get() : Client {
 		return $this->client;
+	}
+
+	/**
+	 * Used to PUT a object to COS
+	 * Instead of Qcloud\Cos\Client::putObject(), because the SDK doesn't support setting file meta
+	 * @param string $src
+	 * @param string $dst
+	 * @param string $host
+	 * @param array $meta
+	 * @return bool
+	 * @throws \ErrorException
+	 */
+	public function upload( string $src, string $dst, string $host, array $meta = [] ) : bool {
+		$headers = [];
+		foreach ( $meta as $key => $value ) {
+			$headers["x-cos-meta-$key"] = $value;
+		}
+		$headers['host'] = $host;
+		$headers['Authorization'] = $this->sign( 'put', $dst, $headers );
+		$magic = MediaWikiServices::getInstance()->getMimeAnalyzer();
+		$headers['Content-Type'] = $magic->guessMimeType( $src );
+		$curl = new Curl();
+		$curl->setOpt( CURLOPT_PUT, true );
+		$curl->setHeaders( $headers );
+		if ( is_file( $src ) ) {
+			$filesize = filesize( $src );
+			$curl->setHeader( 'Content-Length', $filesize );
+			$file = fopen( $src, 'rb' );
+			$curl->setOpt( CURLOPT_INFILE, $file );
+			$curl->setOpt( CURLOPT_INFILESIZE, $filesize );
+			$curl->put( "https://$host$dst" );
+		} else {
+			$curl->setHeader( 'Content-Length', strlen( $src ) );
+			$curl->put( "https://$host$dst", $src );
+		}
+		return $curl->getHttpStatusCode() === 200 ? true : false;
+	}
+
+	/**
+	 * Generate request signature
+	 * @see https://cloud.tencent.com/document/product/436/7778
+	 * @param string $httpMethod HTTP method
+	 * @param string $url
+	 * @param array $headers
+	 * @return string Signature
+	 */
+	private function sign( string $httpMethod, string $url, array $headers ) : string {
+		$tmpHeaders = $headers;
+		foreach ( $tmpHeaders as $key => $value ) {
+			$headers[strtolower( $key )] = urlencode( $value );
+		}
+		ksort( $headers );
+		$nowTime = time();
+		// We sign 60 s
+		$futureTime = $nowTime + 60;
+		$signTime = "$nowTime;$futureTime";
+		$signKey = hash_hmac( 'sha1', $signTime, $this->secretKey );
+		$httpString = "$httpMethod\n$url\n\n";
+		foreach ( $headers as $key => $value ) {
+			$httpString .= "$key=$value&";
+			$headerList[] = $key;
+		}
+		$httpString = substr( $httpString, 0, -1 );
+		$httpString .= "\n";
+		$sha1edHttpString = sha1( $httpString );
+		$stringToSign = "sha1\n$signTime\n$sha1edHttpString\n";
+		$signature = hash_hmac( 'sha1', $stringToSign, $signKey );
+		 return "q-sign-algorithm=sha1&q-ak={$this->secretId}&q-sign-time=$signTime&q-key-time=$signTime".
+			'&q-header-list=' . implode( ';', $headerList ) . "&q-url-param-list=&q-signature=$signature";
 	}
 }
