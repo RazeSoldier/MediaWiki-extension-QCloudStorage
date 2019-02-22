@@ -1,16 +1,21 @@
 {
-  "name": "CDN",
-  "manifest_version": 2,
+  "name": "QCloudStorage",
+  "type": "other ",
+  "author": "[https://www.mediawiki.org/wiki/User:星耀晨曦 RazeSoldier]",
+  "license-name": "GPL-2.0-or-later",
+  "description": "MediaWiki extension that make MW using QCloud COS instead of local storage implementation",
   "requires": {
 	"MediaWiki": ">= 1.31.0"
   },
   "load_composer_autoloader": true,
   "config": {
 	"QCloudAuth": {
-	  "value": []
+	  "value": [],
+	  "description": "Used to generate request signature"
 	}
   },
   "AutoloadNamespaces": {
 	"RazeSoldier\\MWQCloudStorage\\": "includes/"
-  }
+  },
+  "manifest_version": 2
 }
