@@ -1,6 +1,7 @@
 {
   "name": "QCloudStorage",
   "type": "other ",
+  "url": "https://github.com/RazeSoldier/MediaWiki-extension-QCloudStorage",
   "author": "[https://www.mediawiki.org/wiki/User:星耀晨曦 RazeSoldier]",
   "license-name": "GPL-2.0-or-later",
   "description": "MediaWiki extension that make MW using QCloud COS instead of local storage implementation",
