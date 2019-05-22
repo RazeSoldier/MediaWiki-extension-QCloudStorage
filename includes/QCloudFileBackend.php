@@ -209,6 +209,8 @@ class QCloudFileBackend extends \FileBackendStore {
 	protected function doGetLocalCopyMulti( array $params ) : array {
 		/** @var \TempFSFile[] $tmpFiles */
 		$tmpFiles = [];
+		/** @var array $reqs Store information about bulk operations */
+		$reqs = [];
 		foreach ( $params['srcs'] as $src ) {
 			// Get source file extension
 			$ext = \FileBackend::extensionFromPath( $src );
