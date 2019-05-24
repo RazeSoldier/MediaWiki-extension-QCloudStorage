@@ -1,6 +1,6 @@
 {
   "require": {
 	"qcloud/cos-sdk-v5": "^1.0",
-    "php-curl-class/php-curl-class": "^8.5"
+	"php-curl-class/php-curl-class": "^8.5"
   }
 }
