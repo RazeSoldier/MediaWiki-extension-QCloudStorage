@@ -132,7 +132,7 @@ class QCloudAPIClient {
 		$sha1edHttpString = sha1( $httpString );
 		$stringToSign = "sha1\n$signTime\n$sha1edHttpString\n";
 		$signature = hash_hmac( 'sha1', $stringToSign, $signKey );
-		 return "q-sign-algorithm=sha1&q-ak={$this->secretId}&q-sign-time=$signTime&q-key-time=$signTime".
+		return "q-sign-algorithm=sha1&q-ak={$this->secretId}&q-sign-time=$signTime&q-key-time=$signTime" .
 			'&q-header-list=' . implode( ';', $headerList ) . "&q-url-param-list=&q-signature=$signature";
 	}
 }
