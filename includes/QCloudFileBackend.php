@@ -215,7 +215,7 @@ class QCloudFileBackend extends \FileBackendStore {
 			// Get source file extension
 			$ext = \FileBackend::extensionFromPath( $src );
 			// Create a new temporary file...
-			$tmpFile = \TempFSFile::factory( 'localcopy_', $ext, $this->tmpDirectory );
+			$tmpFile = $this->tmpFileFactory->newTempFSFile('localcopy_', $ext);
 			if ( $tmpFile ) {
 				$handle = fopen( $tmpFile->getPath(), 'wb' );
 				if ( $handle ) {
