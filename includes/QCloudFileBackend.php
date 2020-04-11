@@ -67,6 +67,7 @@ class QCloudFileBackend extends \FileBackendStore {
 		$this->endpointBase = "{$this->bucket}.cos.{$authConfig['region']}.myqcloud.com";
 		$this->endpoint = "https://{$this->endpointBase}";
 		$this->viewpoint = $config['viewpoint'] ?? $this->endpoint;
+		$this->memCache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 	}
 
 	/**
