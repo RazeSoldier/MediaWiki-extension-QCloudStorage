@@ -100,7 +100,7 @@ class QCloudAPIClient {
 			$curl->setHeader( 'Content-Length', strlen( $src ) );
 			$curl->put( "https://$host$dst", $src );
 		}
-		return $curl->getHttpStatusCode() === 200 ? true : false;
+		return $curl->getHttpStatusCode() === 200;
 	}
 
 	/**
