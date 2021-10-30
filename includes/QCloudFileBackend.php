@@ -79,7 +79,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param string $storagePath
 	 * @return bool
 	 */
-	public function isPathUsableInternal( $storagePath ) : bool {
+	public function isPathUsableInternal( $storagePath ): bool {
 		// Always return TRUE, because QCloud COS will automatically create a directory
 		return true;
 	}
@@ -89,7 +89,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param array $params
 	 * @return StatusValue
 	 */
-	protected function doCreateInternal( array $params ) : StatusValue {
+	protected function doCreateInternal( array $params ): StatusValue {
 		$this->handleOpsOption( $params );
 		try {
 			$this->client->get()->putObject( [
@@ -108,7 +108,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param array $params
 	 * @return StatusValue
 	 */
-	protected function doStoreInternal( array $params ) : StatusValue {
+	protected function doStoreInternal( array $params ): StatusValue {
 		$this->handleOpsOption( $params );
 		if ( !$this->checkFileCanOverwriteIfExists( $params['dst'], $params['overwrite'] ) ) {
 			return StatusValue::newFatal( 'The target path already exists' );
@@ -135,7 +135,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param array $params
 	 * @return StatusValue
 	 */
-	protected function doCopyInternal( array $params ) : StatusValue {
+	protected function doCopyInternal( array $params ): StatusValue {
 		$this->handleOpsOption( $params );
 		try {
 			$this->client->get()->copyObject( [
@@ -158,7 +158,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param array $params
 	 * @return StatusValue
 	 */
-	protected function doDeleteInternal( array $params ) : StatusValue {
+	protected function doDeleteInternal( array $params ): StatusValue {
 		$this->handleOpsOption( $params );
 		try {
 			$this->client->get()->deleteObject( [
@@ -207,7 +207,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param array $params
 	 * @return array
 	 */
-	protected function doGetLocalCopyMulti( array $params ) : array {
+	protected function doGetLocalCopyMulti( array $params ): array {
 		/** @var \TempFSFile[] $tmpFiles */
 		$tmpFiles = [];
 		/** @var array $reqs Store information about bulk operations */
@@ -216,7 +216,7 @@ class QCloudFileBackend extends \FileBackendStore {
 			// Get source file extension
 			$ext = \FileBackend::extensionFromPath( $src );
 			// Create a new temporary file...
-			$tmpFile = $this->tmpFileFactory->newTempFSFile('localcopy_', $ext);
+			$tmpFile = $this->tmpFileFactory->newTempFSFile( 'localcopy_', $ext );
 			if ( $tmpFile ) {
 				$handle = fopen( $tmpFile->getPath(), 'wb' );
 				if ( $handle ) {
@@ -259,7 +259,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param array $params
 	 * @return bool
 	 */
-	protected function doDirectoryExists( $container, $dir, array $params ) : bool {
+	protected function doDirectoryExists( $container, $dir, array $params ): bool {
 		$containerName = $this->getContainerName( $container );
 		$dir = $containerName === 'public' ? '' : $containerName;
 		$dir .= $dir;
@@ -281,7 +281,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @return array
 	 * @throws \FileBackendError
 	 */
-	public function getDirectoryListInternal( $container, $dir, array $params ) : array {
+	public function getDirectoryListInternal( $container, $dir, array $params ): array {
 		$dirs = [];
 		$files = $this->getFileListInternal( $container, $dir, $params );
 		foreach ( $files as $filePath ) {
@@ -320,7 +320,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @return string[]
 	 * @throws \FileBackendError
 	 */
-	public function getFileListInternal( $container, $dir, array $params ) : array {
+	public function getFileListInternal( $container, $dir, array $params ): array {
 		$res = [];
 		try {
 			$result = $this->client->get()->listObjects( [ 'Bucket' => $this->bucket, 'Prefix' => $dir ] )
@@ -344,7 +344,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 *
 	 * @return bool
 	 */
-	protected function directoriesAreVirtual() : bool {
+	protected function directoriesAreVirtual(): bool {
 		return true;
 	}
 
@@ -356,7 +356,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param bool $overwrite
 	 * @return bool Returns FALSE if the file exists but $overwrite is FALSE, otherwise returns TRUE
 	 */
-	private function checkFileCanOverwriteIfExists( string $src, bool $overwrite ) : bool {
+	private function checkFileCanOverwriteIfExists( string $src, bool $overwrite ): bool {
 		if ( $this->fileExists( [ 'src' => $src ] ) ) {
 			return $overwrite;
 		}
@@ -368,7 +368,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param string $storagePath
 	 * @return string
 	 */
-	private function getRemoteStoragePath( string $storagePath ) :string {
+	private function getRemoteStoragePath( string $storagePath ): string {
 		list( $container, $real ) = $this->resolveStoragePathReal( $storagePath );
 		$containerName = $this->getContainerName( $container );
 		// public container shouldn't need prefix
@@ -381,7 +381,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @param string $container
 	 * @return string
 	 */
-	private function getContainerName( string $container ) : string {
+	private function getContainerName( string $container ): string {
 		preg_match( '/(\w*-)*(?<name>\w*)/', $container, $matches );
 		if ( !isset( $matches['name'] ) ) {
 			throw new \RuntimeException( "Failed to find ContainerName in '$container'" );
@@ -393,7 +393,7 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * Used to pre-handle the boolean flags for operation.
 	 * This method will define all options, even if they don't exist.
 	 * @see \FileBackend::doOperations()
-	 * @param array $op
+	 * @param array &$op
 	 */
 	private function handleOpsOption( array &$op ) {
 		$op['ignoreMissingSource'] = $op['ignoreMissingSource'] ?? false;
@@ -406,14 +406,14 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * Return API endpoint
 	 * @return string
 	 */
-	public function getEndpoint() : string {
+	public function getEndpoint(): string {
 		return $this->endpoint;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getViewpoint() : string {
+	public function getViewpoint(): string {
 		return $this->viewpoint;
 	}
 }

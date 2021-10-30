@@ -20,9 +20,9 @@
 
 namespace RazeSoldier\MWQCloudStorage;
 
-use Qcloud\Cos\Client;
 use Curl\Curl;
 use MediaWiki\MediaWikiServices;
+use Qcloud\Cos\Client;
 
 class QCloudAPIClient {
 	/**
@@ -30,7 +30,14 @@ class QCloudAPIClient {
 	 */
 	private $client;
 
+	/**
+	 * @var string Secret ID of the user token
+	 */
 	private $secretId;
+
+	/**
+	 * @var string Secret Key of the user token
+	 */
 	private $secretKey;
 
 	/**
@@ -62,7 +69,7 @@ class QCloudAPIClient {
 	 * Get Qcloud\Cos\Client instance
 	 * @return Client
 	 */
-	public function get() : Client {
+	public function get(): Client {
 		return $this->client;
 	}
 
@@ -76,7 +83,7 @@ class QCloudAPIClient {
 	 * @return bool
 	 * @throws \ErrorException
 	 */
-	public function upload( string $src, string $dst, string $host, array $meta = [] ) : bool {
+	public function upload( string $src, string $dst, string $host, array $meta = [] ): bool {
 		$dst = '/' . $dst;
 		$headers = [];
 		foreach ( $meta as $key => $value ) {
@@ -111,7 +118,7 @@ class QCloudAPIClient {
 	 * @param array $headers
 	 * @return string Signature
 	 */
-	private function sign( string $httpMethod, string $url, array $headers ) : string {
+	private function sign( string $httpMethod, string $url, array $headers ): string {
 		$tmpHeaders = $headers;
 		foreach ( $tmpHeaders as $key => $value ) {
 			$headers[strtolower( $key )] = urlencode( $value );

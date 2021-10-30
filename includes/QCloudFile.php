@@ -21,6 +21,9 @@
 namespace RazeSoldier\MWQCloudStorage;
 
 class QCloudFile extends \LocalFile {
+	/**
+	 * @var string
+	 */
 	protected $repoClass = QCloudRepo::class;
 
 	/**
@@ -36,7 +39,7 @@ class QCloudFile extends \LocalFile {
 	 * @param null $unused
 	 * @return QCloudFile
 	 */
-	public static function newFromTitle( $title, $repo, $unused = null ) : self {
+	public static function newFromTitle( $title, $repo, $unused = null ): self {
 		return new self( $title, $repo );
 	}
 

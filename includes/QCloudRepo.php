@@ -21,6 +21,9 @@
 namespace RazeSoldier\MWQCloudStorage;
 
 class QCloudRepo extends \LocalRepo {
+	/**
+	 * @var string[]
+	 */
 	protected $fileFactory = [ QCloudFile::class, 'newFromTitle' ];
 
 	/**
@@ -41,8 +44,7 @@ class QCloudRepo extends \LocalRepo {
 	/**
 	 * @return QCloudFileBackend
 	 */
-	public function getBackend() : QCloudFileBackend
-	{
+	public function getBackend(): QCloudFileBackend {
 		return $this->backend;
 	}
 }
