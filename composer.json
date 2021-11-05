@@ -14,7 +14,7 @@
 		"issues": "https://github.com/RazeSoldier/MediaWiki-extension-QCloudStorage/issues"
 	},
 	"require": {
-		"qcloud/cos-sdk-v5": "^1.0",
+		"qcloud/cos-sdk-v5": "^2.0",
 		"php-curl-class/php-curl-class": "^8.5",
 		"php": ">=7.0",
 		"ext-curl": "*"
