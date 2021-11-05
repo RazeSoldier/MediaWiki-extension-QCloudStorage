@@ -21,9 +21,7 @@
 namespace RazeSoldier\MWQCloudStorage;
 
 use MediaWiki\MediaWikiServices;
-use Qcloud\Cos\Exception\CosException;
-use Qcloud\Cos\Exception\NoSuchBucketException;
-use Qcloud\Cos\Exception\NoSuchKeyException;
+use Qcloud\Cos\Exception\ServiceResponseException;
 use StatusValue;
 
 class QCloudFileBackend extends \FileBackendStore {
@@ -97,7 +95,7 @@ class QCloudFileBackend extends \FileBackendStore {
 				'Key' => $this->getRemoteStoragePath( $params['dst'] ),
 				'Body' => $params['content'],
 			] );
-		} catch ( CosException $e ) {
+		} catch ( ServiceResponseException $e ) {
 			return StatusValue::newFatal( $e->getMessage() );
 		}
 		return StatusValue::newGood();
@@ -124,7 +122,7 @@ class QCloudFileBackend extends \FileBackendStore {
 			if ( !$res ) {
 				return StatusValue::newFatal( "Failed to upload {$params['src']}" );
 			}
-		} catch ( CosException $e ) {
+		} catch ( ServiceResponseException $e ) {
 			return StatusValue::newFatal( $e->getMessage() );
 		}
 		return StatusValue::newGood();
@@ -143,7 +141,7 @@ class QCloudFileBackend extends \FileBackendStore {
 				'CopySource' => $this->endpointBase . '/' . $this->getRemoteStoragePath( $params['src'] ),
 				'Key' => $this->getRemoteStoragePath( $params['dst'] ),
 			] );
-		} catch ( NoSuchKeyException $e ) {
+		} catch ( ServiceResponseException $e ) {
 			if ( $params['ignoreMissingSource'] ) {
 				return StatusValue::newGood();
 			} else {
@@ -165,8 +163,8 @@ class QCloudFileBackend extends \FileBackendStore {
 				'Bucket' => $this->bucket,
 				'Key' => $this->getRemoteStoragePath( $params['src'] ),
 			] );
-		} catch ( CosException $e ) {
-			if ( $e instanceof NoSuchKeyException ) {
+		} catch ( ServiceResponseException $e ) {
+			if ( $e->getExceptionCode() === 'NoSuchKey' ) {
 				if ( $params['ignoreMissingSource'] ) {
 					return StatusValue::newGood();
 				} else {
@@ -186,12 +184,11 @@ class QCloudFileBackend extends \FileBackendStore {
 	protected function doGetFileStat( array $params ) {
 		try {
 			$res = $this->client->get()->headObject( [ 'Bucket' => $this->bucket,
-				'Key' => $this->getRemoteStoragePath( $params['src'] ) ] )->getAll();
-		} catch ( NoSuchKeyException $e ) {
-			return false;
-		} catch ( NoSuchBucketException $e ) {
+				'Key' => $this->getRemoteStoragePath( $params['src'] ) ] );
+		} catch ( ServiceResponseException $e ) {
 			return false;
 		}
+
 		$return = [
 			'latest' => $res['LastModified'],
 			'mtime' => $res['LastModified'],
@@ -235,7 +232,7 @@ class QCloudFileBackend extends \FileBackendStore {
 		// Batch exec request
 		foreach ( $reqs as $src => $req ) {
 			try {
-				$res = $this->client->get()->getObject( $req )->getAll();
+				$res = $this->client->get()->getObject( $req );
 				$fileSize = $tmpFiles[$src] ? $tmpFiles[$src]->getSize() : 0;
 				// Double check that the disk is not full/broken
 				if ( $fileSize != $res['ContentLength'] ) {
@@ -243,7 +240,7 @@ class QCloudFileBackend extends \FileBackendStore {
 					$errorMsg = "Try to download $src but got {$fileSize}/{$res['ContentLength']} bytes";
 					wfDebug( '[' . __CLASS__ . '::' . __METHOD__ . "] $errorMsg" );
 				}
-			} catch ( CosException $e ) {
+			} catch ( ServiceResponseException $e ) {
 				$tmpFiles[$src] = null;
 			}
 		}
@@ -266,7 +263,7 @@ class QCloudFileBackend extends \FileBackendStore {
 		$res = $this->client->get()->listObjects( [
 			'Bucket' => $this->bucket,
 			'Prefix' => $dir,
-		] )->getAll();
+		] );
 		return isset( $res['Contents'] );
 	}
 
@@ -323,15 +320,14 @@ class QCloudFileBackend extends \FileBackendStore {
 	public function getFileListInternal( $container, $dir, array $params ): array {
 		$res = [];
 		try {
-			$result = $this->client->get()->listObjects( [ 'Bucket' => $this->bucket, 'Prefix' => $dir ] )
-				->getAll();
+			$result = $this->client->get()->listObjects( [ 'Bucket' => $this->bucket, 'Prefix' => $dir ] );
 			if ( isset( $result['Contents'] ) ) {
 				$files = $result['Contents'];
 				foreach ( $files as $file ) {
 					$res[] = $file['Key'];
 				}
 			}
-		} catch ( CosException $e ) {
+		} catch ( ServiceResponseException $e ) {
 			throw new \FileBackendError( $e->getMessage(), $e->getCode() );
 		}
 		return $res;
