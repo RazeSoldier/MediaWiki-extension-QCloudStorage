@@ -18,5 +18,9 @@
 		"php-curl-class/php-curl-class": "^8.5",
 		"php": ">=7.0",
 		"ext-curl": "*"
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"prepend-autoloader": false
 	}
 }
