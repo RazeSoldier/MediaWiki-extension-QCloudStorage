@@ -20,6 +20,7 @@
 
 namespace RazeSoldier\MWQCloudStorage;
 
+use DeferredUpdates;
 use MediaWiki\MediaWikiServices;
 use Qcloud\Cos\Exception\ServiceResponseException;
 use StatusValue;
@@ -172,6 +173,11 @@ class QCloudFileBackend extends \FileBackendStore {
 				}
 			}
 			return StatusValue::newFatal( $e->getMessage() );
+		}
+
+		if ( MediaWikiServices::getInstance()->getMainConfig()->get( 'QCloudUseCdn' ) ) {
+			// Purge the CDN cache after deleted the files, avoid users accessing edge caches that have been deleted
+			DeferredUpdates::addUpdate( new PurgeCdnJob( [ $this->getViewPointFullUrl( $params['src'] ) ] ) );
 		}
 		return StatusValue::newGood();
 	}
@@ -396,6 +402,15 @@ class QCloudFileBackend extends \FileBackendStore {
 		$op['overwrite'] = $op['overwrite'] ?? false;
 		$op['overwriteSame'] = $op['overwriteSame'] ?? false;
 		$op['headers'] = $op['headers'] ?? [];
+	}
+
+	/**
+	 * Return a full viewpoint URL includes protocol
+	 * @param string $storePath
+	 * @return string
+	 */
+	private function getViewPointFullUrl( string $storePath ): string {
+		return $this->viewpoint . '/' . $this->getRemoteStoragePath( $storePath );
 	}
 
 	/**

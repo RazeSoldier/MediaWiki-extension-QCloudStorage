@@ -17,7 +17,8 @@
 		"qcloud/cos-sdk-v5": "^2.0",
 		"php-curl-class/php-curl-class": "^8.5",
 		"php": ">=7.0",
-		"ext-curl": "*"
+		"ext-curl": "*",
+		"tencentcloud/tencentcloud-sdk-php": "^3.0"
 	},
 	"config": {
 		"optimize-autoloader": true,

@@ -13,6 +13,10 @@
 	"QCloudAuth": {
 	  "value": [],
 	  "description": "Used to generate request signature"
+	},
+	"QCloudUseCdn": {
+	  "value": false,
+	  "description": "Purge CDN cache after deleted files"
 	}
   },
   "AutoloadNamespaces": {
