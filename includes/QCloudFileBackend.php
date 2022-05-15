@@ -189,12 +189,16 @@ class QCloudFileBackend extends \FileBackendStore {
 	 * @return array|false
 	 */
 	protected function doGetFileStat( array $params ) {
+		$this->logger->debug( "Doing QCloudFileBackend::doGetFileStat(): {$params['src']}" );
+		$start = microtime( true );
 		try {
 			$res = $this->client->get()->headObject( [ 'Bucket' => $this->bucket,
 				'Key' => $this->getRemoteStoragePath( $params['src'] ) ] );
 		} catch ( ServiceResponseException $e ) {
 			return false;
 		}
+		$duration = microtime( true ) - $start;
+		$this->logger->debug( 'QCloudFileBackend::doGetFileStat() done, duration: ' . $duration . 's' );
 
 		$return = [
 			'size' => $res['Metadata']['size'],
