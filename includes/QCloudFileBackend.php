@@ -24,6 +24,7 @@ use DeferredUpdates;
 use MediaWiki\MediaWikiServices;
 use Qcloud\Cos\Exception\ServiceResponseException;
 use StatusValue;
+use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 class QCloudFileBackend extends \FileBackendStore {
 	/**
@@ -196,8 +197,8 @@ class QCloudFileBackend extends \FileBackendStore {
 		}
 
 		$return = [
-			'latest' => $res['LastModified'],
-			'mtime' => $res['LastModified'],
+			'size' => $res['Metadata']['size'],
+			'mtime' => ( new ConvertibleTimestamp( $res['LastModified'] ) )->getTimestamp( TS_MW ),
 		];
 		if ( isset( $res['Metadata'] ) ) {
 			$return = array_merge( $return, $res['Metadata'] );
