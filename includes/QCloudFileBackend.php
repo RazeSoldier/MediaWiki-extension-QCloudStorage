@@ -201,7 +201,7 @@ class QCloudFileBackend extends \FileBackendStore {
 		$this->logger->debug( 'QCloudFileBackend::doGetFileStat() done, duration: ' . $duration . 's' );
 
 		$return = [
-			'size' => $res['Metadata']['size'],
+			'size' => $res['Metadata']['size'] ?? null,
 			'mtime' => ( new ConvertibleTimestamp( $res['LastModified'] ) )->getTimestamp( TS_MW ),
 		];
 		if ( isset( $res['Metadata'] ) ) {
