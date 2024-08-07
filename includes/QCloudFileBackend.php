@@ -437,4 +437,20 @@ class QCloudFileBackend extends \FileBackendStore {
 	public function getViewpoint(): string {
 		return $this->viewpoint;
 	}
+
+	protected function doMoveInternal(array $params)
+	{
+		unset( $params['async'] ); // two steps, won't work here :)
+		$nsrc = FileBackend::normalizeStoragePath( $params['src'] );
+		$ndst = FileBackend::normalizeStoragePath( $params['dst'] );
+		// Copy source to dest
+		$status = $this->copyInternal( $params );
+		if ( $nsrc !== $ndst && $status->isOK() ) {
+			// Delete source (only fails due to races or network problems)
+			$status->merge( $this->deleteInternal( [ 'src' => $params['src'] ] ) );
+			$status->setResult( true, $status->value ); // ignore delete() errors
+		}
+
+		return $status;
+	}
 }
