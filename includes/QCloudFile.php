@@ -20,6 +20,9 @@
 
 namespace RazeSoldier\MWQCloudStorage;
 
+use MediaWiki\FileRepo\LocalRepo;
+use MediaWiki\Title\Title;
+
 class QCloudFile extends \LocalFile {
 	/**
 	 * @var string
@@ -32,10 +35,10 @@ class QCloudFile extends \LocalFile {
 	public $repo;
 
 	/**
-	 * @see \LocalFile::newFromTitle()
+	 * @see LocalFile::newFromTitle()
 	 *
-	 * @param \Title $title
-	 * @param \FileRepo $repo
+	 * @param Title $title
+	 * @param LocalRepo $repo
 	 * @param null $unused
 	 * @return QCloudFile
 	 */

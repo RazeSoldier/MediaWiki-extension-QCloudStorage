@@ -24,6 +24,7 @@ use DeferredUpdates;
 use MediaWiki\MediaWikiServices;
 use Qcloud\Cos\Exception\ServiceResponseException;
 use StatusValue;
+use Wikimedia\FileBackend\FileBackend;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 class QCloudFileBackend extends \FileBackendStore {
